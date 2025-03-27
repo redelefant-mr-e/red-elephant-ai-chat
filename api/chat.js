@@ -35,8 +35,10 @@ export default async function handler(req, res) {
 
     const reply = response.data.choices[0].message.content;
     res.status(200).json({ reply });
+  
   } catch (error) {
-    console.error("GPT Error:", error.message);
-    res.status(500).json({ error: "Something went wrong" });
+    console.error("GPT Error:", error.response?.data || error.message || error);
+    res.status(500).json({ error: error.response?.data || error.message || "Unknown error" });
   }
+
 }
