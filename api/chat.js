@@ -1,47 +1,32 @@
+import fs from "fs";
+import path from "path";
 import { Configuration, OpenAIApi } from "openai";
 
+// GPT konfigurieren
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
 });
-
 const openai = new OpenAIApi(configuration);
 
-// Normaler User-Modus
+// 🔁 Markdown-Loader
+function loadPromptFromFile(filename) {
+  const filePath = path.join(process.cwd(), "knowledge", "prompts", filename);
+  return fs.readFileSync(filePath, "utf-8");
+}
+
+// Prompts aus Markdown laden
 const userPrompt = {
   role: "system",
-  content: `
-Du bist Red – der digitale Website-Agent von Red Elephant.
-
-🎯 Deine Aufgabe:
-- Du hilfst Besuchern charmant und professionell bei Fragen rund um Branding, Webdesign, Naming und Strategie.
-- Du sprichst in der Du-Form, modern, klar, direkt – mit Charme.
-- Wenn eine Frage nicht zur Agentur passt, sag freundlich, dass du dazu nichts sagen kannst.
-
-📚 Leistungen:
-- Branding ab 4.500 €
-- Webdesign ab 3.000 €
-- Positionierung & Naming
-- Kampagnenentwicklung
-- Kein SEO, kein Performance-Marketing, kein Baukastendesign.
-`
+  content: loadPromptFromFile("user-prompt.md"),
 };
 
-// Admin-/Trainingsmodus
 const adminPrompt = {
   role: "system",
-  content: `
-Du bist Red Training – der interne Assistent von Red Elephant.
-
-🛠️ Deine Aufgabe:
-- Du hilfst dem Team, strukturiertes Agentur-Wissen aufzubauen.
-- Du nimmst neue Infos entgegen, stellst Rückfragen und bereitest das Wissen in Markdown auf.
-- Du gibst am Ende klare, speicherbare Markdown-Blöcke aus.
-- Beantworte keine allgemeinen Nutzerfragen – du bist im Trainingsmodus.
-`
+  content: loadPromptFromFile("admin-prompt.md"),
 };
 
 export default async function handler(req, res) {
-  // CORS
+  // CORS erlauben
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
